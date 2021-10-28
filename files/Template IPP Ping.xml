@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-10-19T12:08:58Z</date>
+    <groups>
+        <group>
+            <name>IPVPN-NLMK-IT</name>
+        </group>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template IPP Ping</template>
+            <name>Template IPP Ping</name>
+            <groups>
+                <group>
+                    <name>IPVPN-NLMK-IT</name>
+                </group>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>ICMP IPP</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>IPP delay0</name>
+                    <type>TRAP</type>
+                    <key>avg0</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP delay3</name>
+                    <type>TRAP</type>
+                    <key>avg104</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP delay5</name>
+                    <type>TRAP</type>
+                    <key>avg184</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP loss0</name>
+                    <type>TRAP</type>
+                    <key>loss0</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP loss3</name>
+                    <type>TRAP</type>
+                    <key>loss104</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP loss5</name>
+                    <type>TRAP</type>
+                    <key>loss184</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP max0</name>
+                    <type>TRAP</type>
+                    <key>max0</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP max3</name>
+                    <type>TRAP</type>
+                    <key>max104</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP max5</name>
+                    <type>TRAP</type>
+                    <key>max184</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP min0</name>
+                    <type>TRAP</type>
+                    <key>min0</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP min3</name>
+                    <type>TRAP</type>
+                    <key>min104</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>IPP min5</name>
+                    <type>TRAP</type>
+                    <key>min184</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <applications>
+                        <application>
+                            <name>ICMP IPP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+            </items>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>IPP 0</name>
+            <graph_items>
+                <graph_item>
+                    <drawtype>BOLD_LINE</drawtype>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template IPP Ping</host>
+                        <key>avg0</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>IPP 3</name>
+            <graph_items>
+                <graph_item>
+                    <drawtype>BOLD_LINE</drawtype>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template IPP Ping</host>
+                        <key>avg104</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>IPP 5</name>
+            <graph_items>
+                <graph_item>
+                    <drawtype>BOLD_LINE</drawtype>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template IPP Ping</host>
+                        <key>avg184</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>IPP loss</name>
+            <graph_items>
+                <graph_item>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template IPP Ping</host>
+                        <key>loss0</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>2774A4</color>
+                    <item>
+                        <host>Template IPP Ping</host>
+                        <key>loss104</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>F63100</color>
+                    <item>
+                        <host>Template IPP Ping</host>
+                        <key>loss184</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+</zabbix_export>

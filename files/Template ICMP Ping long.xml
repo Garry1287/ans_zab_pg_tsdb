@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-10-19T12:08:42Z</date>
+    <groups>
+        <group>
+            <name>ASA</name>
+        </group>
+        <group>
+            <name>IPVPN-NLMK-IT</name>
+        </group>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template ICMP Ping long</template>
+            <name>Template ICMP Ping long</name>
+            <groups>
+                <group>
+                    <name>ASA</name>
+                </group>
+                <group>
+                    <name>IPVPN-NLMK-IT</name>
+                </group>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>ICMP</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>ICMP ping</name>
+                    <type>SIMPLE</type>
+                    <key>icmpping</key>
+                    <delay>10s</delay>
+                    <history>1w</history>
+                    <applications>
+                        <application>
+                            <name>ICMP</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>ICMP loss</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingloss</key>
+                    <delay>10s</delay>
+                    <history>1w</history>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>ICMP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>ICMP response time</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingsec</key>
+                    <history>1w</history>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <applications>
+                        <application>
+                            <name>ICMP</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+            </items>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Доступность</name>
+            <graph_items>
+                <graph_item>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template ICMP Ping long</host>
+                        <key>icmpping</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

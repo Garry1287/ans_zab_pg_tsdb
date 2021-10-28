@@ -1,0 +1,57 @@
+127.0.0.1	localhost
+10.49.13.34	mon-nlmk
+149.154.167.220	api.telegram.org
+
+####### NLMK-VPN ##############
+#192.168.254.254	LOCALHOST-TEST
+10.255.255.29	kotel
+10.255.255.1	nlmk-lipetsk
+10.255.255.97	wood-house
+10.255.255.9	b.ordinka
+10.255.255.33	yakimanka
+10.255.255.101	td-nlmk
+10.255.255.133	voronezh
+10.255.255.37	berezovsky
+10.255.255.13	revda
+10.255.255.41	n.sergi
+10.255.255.17	sgok
+10.255.255.21	altay-koks
+10.255.255.45	uc-nlmk
+10.255.255.25	kaluga
+10.255.255.49	stagdok
+10.255.255.195	viz-steel
+10.255.255.105	dolomit
+10.255.255.109	novokuznetsk
+10.255.255.113	gk-metallurg
+10.255.255.117	nlmk-engineering
+10.255.255.121	vchm-ufa
+10.255.255.137	vchm-nnovgorod
+10.255.255.153	vchm-izevsk
+10.255.255.157	vchm-tula
+10.255.255.161	vchm-tumen
+10.255.255.125	vchm-lipetsk
+10.255.255.165	vchm-perm
+10.255.255.141	vchm-samara
+10.255.255.145	vchm-yaroslavl
+10.255.255.149	vchm-novosibirsk
+10.255.255.169	vchm-kazan
+10.255.255.173	vchm-mitischi
+10.255.255.177	vchm-orel
+10.255.255.181	vchm-cheboksary
+10.255.255.129	vchm-ioshkar-ola
+10.255.255.185	vchm-penza
+10.255.255.57	vchm-eburg
+10.255.255.65	verona
+10.255.255.73	dansteel
+10.255.255.77	LaLouviere
+10.255.255.81	clabecq
+10.255.255.85	strasbourg
+10.255.255.61	novex
+10.255.255.89	pennsylvania
+10.255.255.93	indiana
+10.255.255.189	amsterdam
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters

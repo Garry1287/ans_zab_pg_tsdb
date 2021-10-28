@@ -1,0 +1,264 @@
+- name: Deploy a zabbix
+  hosts: zabbix
+  tasks:
+
+
+    - name: "Update Repository cache"
+      apt: 
+        update_cache: true
+        cache_valid_time: 0
+        force_apt_get: true
+      tags:
+        - update1
+
+    - name: This is for install zabbix-sql-scripts
+      replace:
+        path: /etc/dpkg/dpkg.cfg.d/excludes
+        regexp: '^(path-exclude=\/usr\/share\/doc/\*)$'
+        replace: '# \1'
+      tags:
+        - replace
+
+    - name: Install first step programm
+      apt: name={{ item }} state=present
+      with_items:
+        - sudo
+        - vim
+        - gnupg
+        - gnupg2
+        - apt-transport-https
+        - python-psycopg2
+      tags:
+        - firststep
+
+    - name: Download zabbix deb
+      get_url:
+        url: https://repo.zabbix.com/zabbix/5.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.4-1+ubuntu18.04_all.deb
+        dest: /tmp/zabbix-release_5.4-1+ubuntu18.04_all.deb
+      tags:
+        - wgetzab
+
+    - name: Install zabbix deb
+      apt:
+        deb: /tmp/zabbix-release_5.4-1+ubuntu18.04_all.deb
+      update_cache: yes
+      tags:
+        - deb
+
+    - name: Install ca-certificate
+      apt: 
+        name: ca-certificates
+        state: latest
+
+ #   - name: "Update Repository cache"
+ #     apt: 
+ #       update_cache: true
+ #       cache_valid_time: 3600
+ #       force_apt_get: true
+ #     tags:
+ #       - update
+#      become: yes
+#      become_user: root
+#      become_method: su
+
+
+    - name: Install zabbix packages
+      apt: name={{ item }} state=present update_cache=true
+#      cache_valid_time: 3600
+#      force_apt_get: true
+      with_items:
+        - zabbix-server-pgsql
+        - zabbix-frontend-php
+        - php7.2-pgsql
+        - zabbix-apache-conf
+        - zabbix-sql-scripts
+        - zabbix-agent
+      tags:
+        - installzab
+
+#   Сначала ключ добавляем, потом обновляем
+    - name: Add postgres  Apt signing key key
+      apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+
+    - name: Add postgresql repo
+      apt_repository:
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main
+        state: present
+        filename: pgdg
+
+
+    - name: Install postgresql
+      apt: name={{ item }} state=present update_cache=true
+#      cache_valid_time: 3600
+#      force_apt_get: true
+      with_items:
+        - postgresql-client-13
+        - postgresql-13
+      tags:
+        - postgresql
+
+    - name: Apt signing key timescale
+      apt_key:
+        url: https://packagecloud.io/timescale/timescaledb/gpgkey
+        state: present
+
+    - name: Add timescale repo
+      apt_repository:
+        repo: deb https://packagecloud.io/timescale/timescaledb/ubuntu/ bionic main
+        state: present
+        filename: timescaledb
+
+    - name: Install timescaledb
+      apt: 
+        name: timescaledb-2-postgresql-13
+        update_cache: true
+        state: latest
+
+    - name: Tune timescale
+      shell: timescaledb-tune --quiet --yes
+
+    - name: Start postgresql service 
+      service:
+        name: postgresql
+        state: started
+        enabled: true
+      become: true
+
+    - name: This is for replace db pass
+      replace:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: '(# DBPassword=)'
+        replace: 'DBPassword=zabbix'
+      tags:
+        - replacedb
+
+    - name: Create a new database
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: zabbix
+      tags:
+        - createdb
+
+    - name: Create zabbix user, set MD5-hashed password
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        db: zabbix
+        name: zabbix
+        password: zabbix
+        encrypted: yes
+      tags:
+        - createuserdb
+
+    - name: "Allow md5 connection for the db user"
+      lineinfile:
+        path: /etc/postgresql/13/main/pg_hba.conf
+            # Порядок строк - влияет на права. Поэтому, если воткнуть в конец - ничего работать не будет.
+            # https://www.sql.ru/forum/actualutils.aspx?action=gotomsg&tid=1195193&msg=18678315
+#           insertafter: '# TYPE'
+        line: host zabbix zabbix 172.17.0.0/16 md5
+        state: present
+        backup: yes
+      register: pgsql_hba_config
+      tags:
+        - createdb2
+    
+#    - name: "Allow md5 connection for the db user"
+#      postgresql_pg_hba:
+#        dest: /etc/postgresql/13/main/pg_hba.conf
+#        contype: host
+#        databases: all
+#        source: 172.17.0.0/16
+#        method: md5
+#        users: zabbix
+#        databases: zabbix
+#        create: true
+#      become: yes
+#      become_user: postgres
+#      tags:
+#        - createdb2
+
+    - name: ReStart postgresql service 
+      service:
+        name: postgresql
+        state: restarted
+      become: true
+      tags:
+        - createdb2
+
+    - name: unarchive zabbix schema
+      command:
+        cmd: gunzip /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql.gz
+        creates: /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql
+      tags:
+        - createdb2
+
+    - name: import database
+      become: yes
+      become_user: postgres
+      #become_method: su 
+      postgresql_db:
+        name: zabbix
+#        login_user: zabbix
+#        login_password: zabbix
+#        login_unix_socket: /var/run/postgresql
+        port: 5432
+        state: restore
+        target: /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql
+      tags:
+        - createdb3
+
+    - name: Shell
+      become: yes
+      become_user: postgres
+      shell: echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" | psql zabbix
+      tags:
+        - createdb3
+
+    - name: Check that the timescaledb.sql exists
+      stat:
+        path: /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql
+      register: timescaledb_result
+      tags:
+        - createdb4
+
+    - name: Import timescaledb
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: zabbix
+#        login_user: zabbix
+#        login_password: zabbix
+        state: restore
+        target: /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql
+      when: timescaledb_result.stat.exists
+      tags:
+        - createdb4
+
+    - name: ReStart zabbix-server service 
+      service:
+        name: zabbix-server
+        state: restarted
+      become: true
+      tags:
+        - finalstart
+
+    - name: ReStart zabbix-agent service 
+      service:
+        name: zabbix-agent
+        state: restarted
+      become: true
+      tags:
+        - finalstart
+
+    - name: ReStart zabbix-server service 
+      service:
+        name: apache2
+        state: restarted
+      become: true
+      tags:
+        - finalstart
+
