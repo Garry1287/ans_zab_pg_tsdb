@@ -1,7 +1,12 @@
-Zabbix plan 2
+#Zabbix plan 2
 
-
+Сертификаты обновить для нормальной работы
+```
 apt install sudo vim ca-certificates gnupg gnupg2
+```
+
+Без этого не установиться zabbix-sql-scripts
+```
 vi /etc/dpkg/dpkg.cfg.d/excludes
 
 and comment next:
@@ -9,67 +14,109 @@ Code:
 
 # Drop all documentation ...
 path-exclude=/usr/share/doc/*
+```
+
+Не работал в anisble update_cache: yes без установки
+```
+apt-get install apt-transport-https
+```
+[Failed to update apt cache (update_cache) · Issue #30754 · ansible/ansible · GitHub](https://github.com/ansible/ansible/issues/30754)
 
 
+Установка zabbix repo и пакетов для zabbix.
 
+```
    wget https://repo.zabbix.com/zabbix/5.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.4-1+ubuntu18.04_all.deb
-    2  dpkg -i zabbix-release_5.4-1+ubuntu18.04_all.deb
-    5  apt update 
-    6  apt install zabbix-server-pgsql zabbix-frontend-php php7.2-pgsql zabbix-apache-conf zabbix-sql-scripts zabbix-agent 
-t
-   16  echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee  /etc/apt/sources.list.d/pgdg.list
+   
+   dpkg -i zabbix-release_5.4-1+ubuntu18.04_all.deb
+   apt update 
+    apt install zabbix-server-pgsql zabbix-frontend-php php7.2-pgsql zabbix-apache-conf zabbix-sql-scripts zabbix-agent 
+```
 
 
-
-
-
-  
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+Установка базы данных
+```
+echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee  /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
  apt install postgresql-13 postgresql-client-13
+```
 
-
- 
+Установка timescaledb и тюнинг базы данных
+ ```
   echo 'deb https://packagecloud.io/timescale/timescaledb/ubuntu/ bionic main'  > /etc/apt/sources.list.d/timescaledb.list
 
  wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey |  apt-key add -
 
-   52  apt update
-   53  apt install timescaledb-2-postgresql-13
-   55  timescaledb-tune --quiet --yes
+   apt update
+   apt install timescaledb-2-postgresql-13
+   timescaledb-tune --quiet --yes
+```
 
+
+Старт базы данных
+```
    service postgresql start (systemctl status postgresql@13-main.service)
+```
 
+
+
+Создание пользователя и базы данных
+```
 # sudo -u postgres createuser --pwprompt zabbix
 # sudo -u postgres createdb -O zabbix zabbix 
+```
 
-
+Импорт схемы и патчинг базы под timescaledb
+```
    zcat /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql.gz | sudo -u zabbix psql zabbix
    echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" | sudo -u postgres psql zabbix
    cat /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql | sudo -u zabbix psql zabbix
+```
 
-
-    Отредактируйте файл /etc/zabbix/zabbix_server.conf
+Пароль от бд для старта базы данных
+Отредактируйте файл /etc/zabbix/zabbix_server.conf
 DBPassword=password 
 
+Не забыть запустить zabbix-server zabbix-agent
+```
+# systemctl restart zabbix-server zabbix-agent apache2
+# systemctl enable zabbix-server zabbix-agent apache2
+```
+Настройте веб-интерфейс Zabbix
+
+Откройте установленный веб-интерфейс Zabbix: http://server_ip_or_name/zabbix
+Выполните действия по этой инструкции: Установка веб-интерфейса Zabbix
+
+
+
+Понимание использования
+```
+raw отличается от command и shell тем, что не выполняет дополнительную обработку выполнения команды. Эти дополнительные обработки присутствуют в почти любом модуле Ansible. Модуль raw передает команду, как есть в "сыром" виде без проверок.
+Модули command и shell отличаются тем, что в модуле command команда выполняется без прохождения через оболочку /bin/sh. Поэтому переменные определенные в оболочке и перенаправления-конвееры работать не будут. Модуль shell выполняет команды через оболочку по умолчанию /bin/sh. Поэтому там будут доступны переменные оболочки и перенаправления. 
+```
 
 
 
 
 
+
+
+
+```
 rm -fr /tmp/tosping
 /var/lib/zabbix/scripts/tosping_hosts-nlmk.sh &
 /var/lib/zabbix/scripts/tosping_hosts-localhost.sh &
-
+```
 
 
 
 
   Скрипты запуска располагаются в автозагрузке /etc/rc.local, в /etc/hosts прописывает имена хостов 
-
+```
 rm -fr /tmp/tosping
 /var/lib/zabbix/scripts/tosping_hosts-nlmk.sh &
 /var/lib/zabbix/scripts/tosping_hosts-localhost.sh &
-
+```
 
 Скрипт /var/lib/zabbix/scripts/tosping_hosts-nlmk.sh запускает в цикле suptosping.sh с параметрами, разными tos
 

@@ -10,6 +10,7 @@ ubuntu_version: bionic
 postgres_port: 5432
 postgres_version: postgresql-13
 postgres_client_version: postgresql-client-13
+timescaledb_version: timescaledb-2-postgresql-13
 postgres_scheme: /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql
 timescaledb_scheme: /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql
 pg_hba_file: /etc/postgresql/13/main/pg_hba.conf

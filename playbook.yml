@@ -1,15 +1,13 @@
 - name: Deploy a zabbix
   hosts: zabbix
   tasks:
-
-
     - name: "Update Repository cache"
       apt: 
         update_cache: true
         cache_valid_time: 0
         force_apt_get: true
       tags:
-        - update1
+        - update-cache
 
     - name: This is for install zabbix-sql-scripts
       replace:
@@ -33,14 +31,14 @@
 
     - name: Download zabbix deb
       get_url:
-        url: https://repo.zabbix.com/zabbix/5.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.4-1+ubuntu18.04_all.deb
-        dest: /tmp/zabbix-release_5.4-1+ubuntu18.04_all.deb
+        url:  https://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu/pool/main/z/zabbix-release/{{ zabbix_release }}
+        dest: /tmp/{{ zabbix_release }}
       tags:
         - wgetzab
 
     - name: Install zabbix deb
       apt:
-        deb: /tmp/zabbix-release_5.4-1+ubuntu18.04_all.deb
+        deb: /tmp/{{ zabbix_release }}
       update_cache: yes
       tags:
         - deb
@@ -79,12 +77,12 @@
 #   Сначала ключ добавляем, потом обновляем
     - name: Add postgres  Apt signing key key
       apt_key:
-        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        url: https://www.postgresql.org/media/keys/{{ postgresql_key }}
         state: present
 
     - name: Add postgresql repo
       apt_repository:
-        repo: deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ ubuntu_version }}-pgdg main
         state: present
         filename: pgdg
 
@@ -106,7 +104,7 @@
 
     - name: Add timescale repo
       apt_repository:
-        repo: deb https://packagecloud.io/timescale/timescaledb/ubuntu/ bionic main
+        repo: deb https://packagecloud.io/timescale/timescaledb/ubuntu/ {{ ubuntu_version }} main
         state: present
         filename: timescaledb
 
@@ -130,7 +128,7 @@
       replace:
         path: /etc/zabbix/zabbix_server.conf
         regexp: '(# DBPassword=)'
-        replace: 'DBPassword=zabbix'
+        replace: 'DBPassword={{ db_password }}'
       tags:
         - replacedb
 
@@ -146,20 +144,20 @@
       become: yes
       become_user: postgres
       postgresql_user:
-        db: zabbix
-        name: zabbix
-        password: zabbix
+        db: "{{ db_name }}"
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
         encrypted: yes
       tags:
         - createuserdb
 
     - name: "Allow md5 connection for the db user"
       lineinfile:
-        path: /etc/postgresql/13/main/pg_hba.conf
+        path: "{{ pg_hba_file }}"
             # Порядок строк - влияет на права. Поэтому, если воткнуть в конец - ничего работать не будет.
             # https://www.sql.ru/forum/actualutils.aspx?action=gotomsg&tid=1195193&msg=18678315
 #           insertafter: '# TYPE'
-        line: host zabbix zabbix 172.17.0.0/16 md5
+        line: "{{ pg_hba_file_line }}"
         state: present
         backup: yes
       register: pgsql_hba_config
@@ -201,11 +199,8 @@
       become_user: postgres
       #become_method: su 
       postgresql_db:
-        name: zabbix
-#        login_user: zabbix
-#        login_password: zabbix
-#        login_unix_socket: /var/run/postgresql
-        port: 5432
+        name: "{{ db_name }}"
+        port: "{{ postgres_port }}"
         state: restore
         target: /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql
       tags:
@@ -230,8 +225,6 @@
       become_user: postgres
       postgresql_db:
         name: zabbix
-#        login_user: zabbix
-#        login_password: zabbix
         state: restore
         target: /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql
       when: timescaledb_result.stat.exists
@@ -261,4 +254,3 @@
       become: true
       tags:
         - finalstart
-
