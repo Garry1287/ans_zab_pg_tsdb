@@ -1,0 +1,53 @@
+    - name: Download zabbix deb
+      get_url:
+        url:  https://repo.zabbix.com/zabbix/{{ zabbix_version }}/ubuntu/pool/main/z/zabbix-release/{{ zabbix_release }}
+        dest: /tmp/{{ zabbix_release }}
+      tags:
+        - wgetzab
+
+    - name: Install zabbix deb
+      apt:
+        deb: /tmp/{{ zabbix_release }}
+      update_cache: yes
+      tags:
+        - deb
+
+    - name: Install ca-certificate
+      apt: 
+        name: ca-certificates
+        state: latest
+
+ #   - name: "Update Repository cache"
+ #     apt: 
+ #       update_cache: true
+ #       cache_valid_time: 3600
+ #       force_apt_get: true
+ #     tags:
+ #       - update
+#      become: yes
+#      become_user: root
+#      become_method: su
+
+
+    - name: Install zabbix packages
+      apt: name={{ item }} state=present update_cache=true
+#      cache_valid_time: 3600
+#      force_apt_get: true
+      with_items:
+        - zabbix-server-pgsql
+        - zabbix-frontend-php
+        - php7.2-pgsql
+        - zabbix-apache-conf
+        - zabbix-sql-scripts
+        - zabbix-agent
+      tags:
+        - installzab
+
+
+    - name: This is for replace db pass
+      replace:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: '(# DBPassword=)'
+        replace: 'DBPassword={{ db_password }}'
+      tags:
+        - replacedb

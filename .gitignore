@@ -17,3 +17,5 @@ README.html
 .idea
 *.iml
 *.retry
+secret.yml
+vault.key

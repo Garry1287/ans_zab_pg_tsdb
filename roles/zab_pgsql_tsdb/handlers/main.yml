@@ -1,0 +1,7 @@
+---
+# handlers file for zab_pgsql_tsdb
+- name: ReStart postgresql 
+  service:
+    name: postgresql
+    state: restarted
+  become: true

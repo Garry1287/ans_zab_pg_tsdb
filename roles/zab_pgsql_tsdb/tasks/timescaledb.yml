@@ -1,0 +1,53 @@
+    - name: Apt signing key timescale
+      apt_key:
+        url: https://packagecloud.io/timescale/timescaledb/gpgkey
+        state: present
+
+    - name: Add timescale repo
+      apt_repository:
+        repo: deb https://packagecloud.io/timescale/timescaledb/ubuntu/ {{ ubuntu_version }} main
+        state: present
+        filename: timescaledb
+
+    - name: Install timescaledb
+      apt: 
+        name: timescaledb-2-postgresql-13
+        update_cache: true
+        state: latest
+
+    - name: Tune timescale
+      shell: timescaledb-tune --quiet --yes
+      notify:
+        - ReStart postgresql
+
+    - name: ReStart postgresql service 
+      service:
+        name: postgresql
+        state: restarted
+      become: true
+
+
+    - name: Shell
+      become: yes
+      become_user: postgres
+      shell: echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" | psql zabbix
+      tags:
+        - createdb3
+
+    - name: Check that the timescaledb.sql exists
+      stat:
+        path: /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql
+      register: timescaledb_result
+      tags:
+        - createdb4
+
+    - name: Import timescaledb
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: zabbix
+        state: restore
+        target: /usr/share/doc/zabbix-sql-scripts/postgresql/timescaledb.sql
+      when: timescaledb_result.stat.exists
+      tags:
+        - createdb4
