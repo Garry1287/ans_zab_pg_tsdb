@@ -1,0 +1,67 @@
+---
+- name: "Update Repository cache"
+  apt: 
+    update_cache: true
+    cache_valid_time: 0
+    force_apt_get: true
+  tags:
+      - update-cache
+
+- name: This is for install zabbix-sql-scripts
+  replace:
+    path: /etc/dpkg/dpkg.cfg.d/excludes
+    regexp: '^(path-exclude=\/usr\/share\/doc/\*)$'
+    replace: '# \1'
+  tags:
+      - replace
+
+- name: Install first step programm
+  apt: name={{ item }} state=present
+  with_items:
+    - sudo
+    - vim
+    - gnupg
+    - gnupg2
+    - apt-transport-https
+    - python-psycopg2
+  tags:
+    - firststep
+
+#    - name: "Include OS-specific variables"
+#      include_vars: "{{ ansible_os_family }}.yml"
+
+- name: "Install zabbix repo and pakages"
+  include_tasks: "zabbix.yml"
+
+- name: "Installing the postgresql database"
+  include_tasks: "db.yml"
+
+- name: "Installing timescaledb"
+  include_tasks: "timescaledb.yml"
+
+- name: ReStart zabbix-server service 
+  service:
+    name: zabbix-server
+    state: restarted
+    enabled: yes
+  become: true
+  tags:
+    - finalstart
+
+- name: ReStart zabbix-agent service 
+  service:
+    name: zabbix-agent
+    state: restarted
+    enabled: yes
+  become: true
+  tags:
+    - finalstart
+
+- name: ReStart zabbix-server service 
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+  become: true
+  tags:
+    - finalstart

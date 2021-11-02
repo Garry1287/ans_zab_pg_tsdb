@@ -1,0 +1,107 @@
+#   Сначала ключ добавляем, потом обновляем
+    - name: Add postgres  Apt signing key key
+      apt_key:
+        url: https://www.postgresql.org/media/keys/{{ postgresql_key }}
+        state: present
+      tags:
+        - postgresql
+
+    - name: Add postgresql repo
+      apt_repository:
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ ubuntu_version }}-pgdg main
+        state: present
+        filename: pgdg
+      tags:
+        - postgresql
+
+    - name: Install postgresql
+      apt: name={{ item }} state=present update_cache=true
+#      cache_valid_time: 3600
+#      force_apt_get: true
+      with_items:
+        - postgresql-client-13
+        - postgresql-13
+      tags:
+        - postgresql
+
+    - name: Start postgresql service 
+      service:
+        name: postgresql
+        state: started
+        enabled: true
+      become: true
+
+    - name: Create a new database
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: zabbix
+      tags:
+        - postgresql
+
+    - name: Create zabbix user, set MD5-hashed password
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        db: "{{ db_name }}"
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        encrypted: yes
+      tags:
+        - postgresql
+
+    - name: "Allow md5 connection for the db user"
+      lineinfile:
+        path: "{{ pg_hba_file }}"
+            # Порядок строк - влияет на права. Поэтому, если воткнуть в конец - ничего работать не будет.
+            # https://www.sql.ru/forum/actualutils.aspx?action=gotomsg&tid=1195193&msg=18678315
+#           insertafter: '# TYPE'
+        line: "{{ pg_hba_file_line }}"
+        state: present
+        backup: yes
+      register: pgsql_hba_config
+      tags:
+        - postgresql
+    
+#    - name: "Allow md5 connection for the db user"
+#      postgresql_pg_hba:
+#        dest: /etc/postgresql/13/main/pg_hba.conf
+#        contype: host
+#        databases: all
+#        source: 172.17.0.0/16
+#        method: md5
+#        users: zabbix
+#        databases: zabbix
+#        create: true
+#      become: yes
+#      become_user: postgres
+#      tags:
+#        - createdb2
+
+    - name: ReStart postgresql service 
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+      become: true
+      tags:
+        - postgresql
+
+    - name: unarchive zabbix schema
+      command:
+        cmd: gunzip /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql.gz
+        creates: /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql
+      tags:
+        - postgresql
+
+    - name: import database
+      become: yes
+      become_user: postgres
+      #become_method: su 
+      postgresql_db:
+        name: "{{ db_name }}"
+        port: "{{ postgres_port }}"
+        state: restore
+        target: /usr/share/doc/zabbix-sql-scripts/postgresql/create.sql
+      tags:
+        - postgresql
